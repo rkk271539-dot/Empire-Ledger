@@ -14,14 +14,22 @@ export const WifeTab: React.FC = () => {
 
   return (
     <div className="space-y-4 pb-20 md:pb-6">
-      <div>
-        <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-          <HeartHandshake className="w-5 h-5 text-emerald-400" />
-          Ananya Mehta (Wife & Partner)
-        </h2>
-        <p className="text-xs text-gray-400 mt-0.5">
-          Independent AI investor, portfolio manager, and advisor · Roadmap: Full life & trust in v0.6
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center overflow-hidden shrink-0">
+          {wife?.avatarUrl ? (
+            <img src={wife.avatarUrl} alt={wife.name} className="w-full h-full object-cover" />
+          ) : (
+            <HeartHandshake className="w-6 h-6 text-emerald-400" />
+          )}
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
+            {wife?.name ?? 'Ananya Mehta'} (Wife & Partner)
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Independent AI investor, portfolio manager, and advisor · Roadmap: Full life & trust in v0.6
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

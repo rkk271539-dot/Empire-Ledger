@@ -23,3 +23,13 @@ This document records architectural, algorithmic, and game design decisions when
 - **Context**: Section 2.2: "Engine is headless. /src/engine has zero React/DOM imports."
 - **Choice**: Pure TypeScript engine with message-based worker bridge (`sim.worker.ts` and `bridge.ts`). Can also run synchronously in main thread if web workers are disabled or during testing.
 - **Rationale**: Keeps UI smooth at 60fps even during 60-day fast-forwards on low-powered mobile devices.
+
+## Decision 005: Avatar & Photo Persistence
+- **Context**: User requested ability to upload custom photos for player, wife, rival at game start.
+- **Choice**: Implemented local FileReader conversion to base64 Data URLs with 2MB client-side limit, stored directly in the player and person state objects.
+- **Rationale**: Completely offline and portable across IndexedDB saves and JSON export/import without requiring external image hosting services.
+
+## Decision 006: Project Capacity Distribution
+- **Context**: Section 7.2 and 18A.5 define work capacity and projects pipeline.
+- **Choice**: Workforce capacity is calculated from Operations and R&D employees' `skill * productivity * (0.6 + 0.4 * morale)` scaled by Operations department efficiency, and distributed across active projects.
+- **Rationale**: Links workforce hiring, training, and morale directly to tangible contract delivery speed and company cash flow.

@@ -5,6 +5,7 @@ import { TopBar } from '../ui/layout/TopBar';
 import { Sidebar } from '../ui/layout/Sidebar';
 import { BottomTabs } from '../ui/layout/BottomTabs';
 import { ToastContainer } from '../ui/components/ToastContainer';
+import { FounderSetupModal } from '../ui/components/FounderSetupModal';
 
 import { DashboardTab } from '../ui/tabs/DashboardTab';
 import { CompanyTab } from '../ui/tabs/CompanyTab';
@@ -18,8 +19,8 @@ import { FinanceTab } from '../ui/tabs/FinanceTab';
 import { SettingsTab } from '../ui/tabs/SettingsTab';
 
 export const App: React.FC = () => {
-  const { isReady, init, dispatch } = useGameStore();
-  const { activeTab, autoPlay, autoPlaySpeed } = useUIStore();
+  const { state, isReady, init, dispatch } = useGameStore();
+  const { activeTab, autoPlay, autoPlaySpeed, isFounderSetupOpen, setFounderSetupOpen } = useUIStore();
 
   useEffect(() => {
     init();
@@ -97,6 +98,12 @@ export const App: React.FC = () => {
 
       {/* Global Toast System */}
       <ToastContainer />
+
+      {/* Founder Setup Onboarding & Profile Edit Modal */}
+      <FounderSetupModal
+        isOpen={!state.flags.gameSetupCompleted || isFounderSetupOpen}
+        onClose={() => setFounderSetupOpen(false)}
+      />
     </div>
   );
 };

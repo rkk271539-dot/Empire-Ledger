@@ -23,6 +23,7 @@ export const SettingsTab: React.FC = () => {
     numberFormat,
     setNumberFormat,
     showToast,
+    setFounderSetupOpen,
   } = useUIStore();
 
   const [playerNameInput, setPlayerNameInput] = useState(state.player.name);
@@ -257,6 +258,24 @@ export const SettingsTab: React.FC = () => {
                 Update Name
               </button>
             </form>
+          </div>
+
+          {/* Edit Full Profile & Photos */}
+          <div className="pt-3 border-t border-gray-800 flex items-center justify-between">
+            <div>
+              <span className="font-semibold text-xs text-gray-200">
+                Founder, Partner & Rival Identity
+              </span>
+              <p className="text-[11px] text-gray-400">
+                Update names, company sector, and upload photos for all key figures.
+              </p>
+            </div>
+            <button
+              onClick={() => setFounderSetupOpen(true)}
+              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition shadow-sm"
+            >
+              Edit Profile & Photos
+            </button>
           </div>
         </div>
       </Card>

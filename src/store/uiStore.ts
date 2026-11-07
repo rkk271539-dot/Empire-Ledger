@@ -26,6 +26,7 @@ interface UIStore {
   autoPlay: boolean;
   autoPlaySpeed: 1 | 2 | 4; // 1x, 2x, 4x
   isMoreMenuOpen: boolean;
+  isFounderSetupOpen: boolean;
   toasts: Toast[];
   setActiveTab: (tab: TabId) => void;
   setTheme: (theme: 'dark' | 'light') => void;
@@ -33,6 +34,7 @@ interface UIStore {
   toggleAutoPlay: () => void;
   setAutoPlaySpeed: (speed: 1 | 2 | 4) => void;
   setMoreMenuOpen: (open: boolean) => void;
+  setFounderSetupOpen: (open: boolean) => void;
   showToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
   removeToast: (id: string) => void;
 }
@@ -44,6 +46,7 @@ export const useUIStore = create<UIStore>((set) => ({
   autoPlay: false,
   autoPlaySpeed: 1,
   isMoreMenuOpen: false,
+  isFounderSetupOpen: false,
   toasts: [],
 
   setActiveTab: (tab) => set({ activeTab: tab, isMoreMenuOpen: false }),
@@ -64,6 +67,8 @@ export const useUIStore = create<UIStore>((set) => ({
   setAutoPlaySpeed: (autoPlaySpeed) => set({ autoPlaySpeed }),
 
   setMoreMenuOpen: (isMoreMenuOpen) => set({ isMoreMenuOpen }),
+
+  setFounderSetupOpen: (isFounderSetupOpen) => set({ isFounderSetupOpen }),
 
   showToast: (message, type = 'info') => {
     const id = `toast_${Date.now()}_${Math.floor(Math.random() * 1000)}`;

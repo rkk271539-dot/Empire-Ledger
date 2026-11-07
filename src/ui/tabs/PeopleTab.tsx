@@ -28,8 +28,12 @@ export const PeopleTab: React.FC = () => {
         {/* Rival Pinned Top */}
         <div className="p-4 rounded-xl bg-gradient-to-r from-rose-950/30 to-gray-900 border border-rose-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 font-bold text-sm">
-              VS
+            <div className="w-11 h-11 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 font-bold text-sm overflow-hidden shrink-0">
+              {rival?.avatarUrl ? (
+                <img src={rival.avatarUrl} alt={rival.name} className="w-full h-full object-cover" />
+              ) : (
+                (rival?.name ?? 'VS').substring(0, 2).toUpperCase()
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -57,8 +61,12 @@ export const PeopleTab: React.FC = () => {
         {/* Wife Pinned */}
         <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/30 to-gray-900 border border-emerald-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-sm">
-              AM
+            <div className="w-11 h-11 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-sm overflow-hidden shrink-0">
+              {wife?.avatarUrl ? (
+                <img src={wife.avatarUrl} alt={wife.name} className="w-full h-full object-cover" />
+              ) : (
+                (wife?.name ?? 'AM').substring(0, 2).toUpperCase()
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -86,8 +94,12 @@ export const PeopleTab: React.FC = () => {
         {/* Player */}
         <div className="p-4 rounded-xl bg-gradient-to-r from-blue-950/30 to-gray-900 border border-blue-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-bold text-sm">
-              YOU
+            <div className="w-11 h-11 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-bold text-sm overflow-hidden shrink-0">
+              {state.player.avatarUrl ? (
+                <img src={state.player.avatarUrl} alt={state.player.name} className="w-full h-full object-cover" />
+              ) : (
+                state.player.name.substring(0, 2).toUpperCase()
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -99,7 +111,7 @@ export const PeopleTab: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-gray-400 mt-0.5">
-                Charm: {state.player.charm}/100 · Reputation: {state.player.reputation}/100
+                City: {state.player.city || 'Mumbai'} · Charm: {state.player.charm}/100 · Reputation: {state.player.reputation}/100
               </p>
             </div>
           </div>

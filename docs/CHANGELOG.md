@@ -4,6 +4,24 @@ All notable changes to Empire Ledger are documented in this file.
 
 ---
 
+## [0.2.0] - Economy Core
+
+### Added
+- **Founder Setup & Onboarding Registry**:
+  - Interactive startup modal allowing players to customize founder name, city, flagship company, and upload personal photos for the player, wife, and rival.
+  - Image upload support storing lightweight data URLs directly in state and persistence.
+- **Player Flagship Company & Departments (`/src/engine/company/`)**:
+  - 6 Departments: Marketing, HR, Operations, R&D, Finance, Management with tunable daily budgets.
+  - Full Employee system with skills (1-10), daily salaries, morale tracking, and hire/fire/train/promote commands.
+  - Client project pipeline with work unit progression, deadline tracking, client default risk, and major revenue milestones.
+  - Proprietary product lines generating recurring daily income with Section 7.2 volatility caps.
+  - Financial statements: Comprehensive Daily P&L and Balance Sheet with 12x EBITDA corporate valuation.
+- **Company Tab Redesign**:
+  - Sub-navigation for Overview & P&L, Departments Hub, Workforce Management, Projects Pipeline, Products, and Strategy Levers.
+- Unit tests in `tests/engine/company.test.ts` verifying 100-day company operations.
+
+---
+
 ## [0.1.0] - Foundation
 
 ### Added

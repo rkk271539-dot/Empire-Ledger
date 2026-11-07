@@ -94,7 +94,7 @@ export const DashboardTab: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Rival Card */}
         <Card
-          title="Main Rival: Vikram Singhania"
+          title={`Main Rival: ${rival?.name ?? 'Vikram Singhania'}`}
           subtitle="Industrialist & Tech Competitor"
           action={
             <button
@@ -106,6 +106,22 @@ export const DashboardTab: React.FC = () => {
           }
         >
           <div className="space-y-3">
+            <div className="flex items-center gap-3 pb-2 border-b border-gray-800/60">
+              <div className="w-11 h-11 rounded-full bg-rose-950/60 border border-rose-500/40 flex items-center justify-center overflow-hidden shrink-0">
+                {rival?.avatarUrl ? (
+                  <img src={rival.avatarUrl} alt={rival.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-rose-400">
+                    {(rival?.name ?? 'VS').substring(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div>
+                <span className="font-bold text-xs text-gray-100">{rival?.name}</span>
+                <p className="text-[10px] text-gray-400">Arch Competitor · Tech & Infra</p>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between text-xs">
               <span className="text-gray-400">Net Worth</span>
               <span className="font-bold text-gray-100 tabular-nums">
@@ -132,7 +148,7 @@ export const DashboardTab: React.FC = () => {
 
         {/* Wife Card */}
         <Card
-          title="Partner: Ananya Mehta"
+          title={`Partner: ${wife?.name ?? 'Ananya Mehta'}`}
           subtitle="Independent Investor & Strategic Ally"
           action={
             <button
@@ -144,6 +160,22 @@ export const DashboardTab: React.FC = () => {
           }
         >
           <div className="space-y-3">
+            <div className="flex items-center gap-3 pb-2 border-b border-gray-800/60">
+              <div className="w-11 h-11 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center overflow-hidden shrink-0">
+                {wife?.avatarUrl ? (
+                  <img src={wife.avatarUrl} alt={wife.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-emerald-400">
+                    {(wife?.name ?? 'AM').substring(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div>
+                <span className="font-bold text-xs text-gray-100">{wife?.name}</span>
+                <p className="text-[10px] text-gray-400">Strategic Ally · Value Investor</p>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between text-xs">
               <span className="text-gray-400">Net Worth</span>
               <span className="font-bold text-gray-100 tabular-nums">

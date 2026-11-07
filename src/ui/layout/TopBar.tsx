@@ -7,7 +7,7 @@ import { formatMoney } from '../../utils/format';
 
 export const TopBar: React.FC = () => {
   const { state, dispatch } = useGameStore();
-  const { numberFormat, autoPlay, toggleAutoPlay } = useUIStore();
+  const { numberFormat, autoPlay, toggleAutoPlay, setFounderSetupOpen } = useUIStore();
   const clock = getClockInfo(state.day, state.slot);
 
   const handleAdvanceSlot = () => {
@@ -21,8 +21,26 @@ export const TopBar: React.FC = () => {
   return (
     <header className="sticky top-0 z-30 bg-gray-950/90 backdrop-blur-md border-b border-gray-800/80 px-4 py-2.5 sm:px-6">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-        {/* Left: Day & Date Info */}
+        {/* Left: Founder Avatar & Day/Date Info */}
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setFounderSetupOpen(true)}
+            title="Edit Founder & Empire Profile"
+            className="w-9 h-9 rounded-full bg-blue-600/20 border border-blue-500/40 flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-blue-400 transition shrink-0 active:scale-95"
+          >
+            {state.player.avatarUrl ? (
+              <img
+                src={state.player.avatarUrl}
+                alt={state.player.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-xs font-bold text-blue-400">
+                {state.player.name.substring(0, 2).toUpperCase()}
+              </span>
+            )}
+          </button>
+
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm sm:text-base text-gray-100 flex items-center gap-1.5">

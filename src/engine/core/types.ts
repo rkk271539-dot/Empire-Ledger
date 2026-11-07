@@ -3,6 +3,7 @@ export type PersonId = string;
 export type CompanyId = string;
 export type SectorId = string;
 export type PersonalityId = string;
+export type DepartmentId = 'marketing' | 'hr' | 'operations' | 'rd' | 'finance' | 'management';
 
 export interface GameState {
   schemaVersion: number;
@@ -35,6 +36,8 @@ export interface MacroState {
 export interface PlayerState {
   id: PersonId;
   name: string;
+  avatarUrl?: string;
+  city?: string;
   cash: Money;
   debt: Money;
   netWorth: Money;
@@ -47,6 +50,7 @@ export interface PlayerState {
 export interface Person {
   id: PersonId;
   name: string;
+  avatarUrl?: string;
   gender: 'M' | 'F';
   age: number;
   role: 'player' | 'wife' | 'rival' | 'investor' | 'founder';
@@ -78,6 +82,94 @@ export interface Relationship {
   lastInteractionDay: number;
 }
 
+export interface Department {
+  id: DepartmentId;
+  name: string;
+  level: number;
+  budgetDaily: Money;
+  efficiency: number;
+  staffCount: number;
+  autoManage?: boolean;
+}
+
+export interface Employee {
+  id: string;
+  name: string;
+  department: DepartmentId;
+  role: string;
+  skill: number; // 1 to 10
+  salaryDaily: Money;
+  morale: number; // 0 to 1
+  hireDay: number;
+  productivity: number; // multiplier e.g. 0.8 - 1.5
+}
+
+export interface CompanyProject {
+  id: string;
+  name: string;
+  clientName: string;
+  size: number; // total work units needed
+  workCompleted: number;
+  payout: Money;
+  deadlineDay: number;
+  status: 'available' | 'active' | 'delivered' | 'failed';
+  clientDefaultRisk: number; // 0 - 1
+}
+
+export interface ProductLine {
+  id: string;
+  name: string;
+  dailyRevenue: Money;
+  dailyCost: Money;
+  quality: number; // 0 to 1
+  attractiveness: number; // 0 to 1
+  launchDay: number;
+}
+
+export interface CompanyStrategy {
+  brandingSpendDaily: Money;
+  rdSpendDaily: Money;
+  expansionMode: 'conservative' | 'balanced' | 'aggressive';
+  costCuttingActive: boolean;
+  dividendPayoutRatio: number; // 0 to 1
+}
+
+export interface DailyFinancialRecord {
+  day: number;
+  revenue: Money;
+  cogs: Money;
+  payroll: Money;
+  rd: Money;
+  marketing: Money;
+  overhead: Money;
+  ebitda: Money;
+  netIncome: Money;
+  cashBalance: Money;
+}
+
+export interface FinancialStatements {
+  pl: {
+    revenue: Money;
+    cogs: Money;
+    payroll: Money;
+    rd: Money;
+    marketing: Money;
+    overhead: Money;
+    ebitda: Money;
+    netIncome: Money;
+  };
+  balanceSheet: {
+    cash: Money;
+    accountsReceivable: Money;
+    equipmentValuation: Money;
+    totalAssets: Money;
+    debt: Money;
+    retainedEarnings: Money;
+    totalEquity: Money;
+  };
+  history30d: DailyFinancialRecord[];
+}
+
 export interface Company {
   id: CompanyId;
   name: string;
@@ -95,6 +187,12 @@ export interface Company {
     debt: Money;
     employees: number;
   };
+  departments?: Record<DepartmentId, Department>;
+  employeesList?: Employee[];
+  projects?: CompanyProject[];
+  products?: ProductLine[];
+  strategy?: CompanyStrategy;
+  financialStatements?: FinancialStatements;
   quality: {
     management: number;
     growth: number;
