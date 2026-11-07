@@ -1,4 +1,4 @@
-import { DepartmentId, Money } from './types';
+import { CompanyId, DepartmentId, Money } from './types';
 
 export type Command =
   | { type: 'ADVANCE_SLOT' }
@@ -6,6 +6,8 @@ export type Command =
   | { type: 'SET_SLOT'; slot: 0 | 1 | 2 | 3 }
   | { type: 'RENAME_PLAYER'; name: string }
   | { type: 'RESET_GAME'; seed?: number }
+  | { type: 'BUY_SHARES'; companyId: CompanyId; shares: number }
+  | { type: 'SELL_SHARES'; companyId: CompanyId; shares: number }
   | {
       type: 'SETUP_FOUNDER';
       playerName: string;

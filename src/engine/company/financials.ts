@@ -67,9 +67,17 @@ export function computeCompanyValuation(
   cash: Money,
   debt: Money
 ): Money {
-  // If profitable, value at 12x EBITDA, otherwise 3x Revenue + net cash
-  if (annualizedEbitda > 0) {
-    return Math.round(annualizedEbitda * 12 + cash - debt);
+  // Healthy valuation: 10x-14x normalized annualized EBITDA + net cash,
+  // or 2.5x Revenue if EBITDA is low/early stage.
+  // Bound to prevent unrealistic explosive jumps.
+  let baseValuation: number;
+  if (annualizedEbitda > 10000000) { // > ₹1 Cr EBITDA
+    baseValuation = annualizedEbitda * 12 + Math.max(0, cash - debt);
+  } else if (annualizedEbitda > 0) {
+    baseValuation = Math.max(annualizedRevenue * 2.5, annualizedEbitda * 10) + Math.max(0, cash - debt);
+  } else {
+    baseValuation = Math.max(25000000, annualizedRevenue * 2.0 + Math.max(0, cash - debt));
   }
-  return Math.round(Math.max(10000000, annualizedRevenue * 3 + cash - debt));
+
+  return Math.round(baseValuation);
 }

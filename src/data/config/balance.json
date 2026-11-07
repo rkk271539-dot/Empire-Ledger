@@ -12,6 +12,7 @@
   "dailyCircuitLimit": 0.10,
   "baseRiskFreeRate": 0.065,
   "defaultStockDailyVol": 0.018,
+  "tradingFeeRate": 0.001,
   "loanInterestRate": 0.12,
   "loanDurationDays": 100,
   "fdInterestRate": 0.06,

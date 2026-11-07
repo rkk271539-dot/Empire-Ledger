@@ -73,6 +73,10 @@ describe('Company & Economy Core (v0.2 Acceptance Criteria)', () => {
 
     // Verify net worth is computed from cash + company equity valuation
     expect(state.player.netWorth).toBeGreaterThan(0);
+    // Sanity check against explosive 7000cr spike bug:
+    const valuation = company.price * company.sharesOutstanding;
+    expect(valuation).toBeLessThan(10000000000); // Must be strictly under 1,000 Cr in early 100 days
+    expect(state.player.netWorth).toBeLessThan(10000000000);
     expect(state.history.days.length).toBe(101);
   });
 

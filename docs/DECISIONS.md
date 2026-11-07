@@ -33,3 +33,16 @@ This document records architectural, algorithmic, and game design decisions when
 - **Context**: Section 7.2 and 18A.5 define work capacity and projects pipeline.
 - **Choice**: Workforce capacity is calculated from Operations and R&D employees' `skill * productivity * (0.6 + 0.4 * morale)` scaled by Operations department efficiency, and distributed across active projects.
 - **Rationale**: Links workforce hiring, training, and morale directly to tangible contract delivery speed and company cash flow.
+
+## Decision 007: Enterprise Valuation Smoothing & Circuit Clamps
+- **Context**: Milestone project deliveries generated large lump-sum cash payments (e.g. ₹2.5 Cr) on single days. When multiplied by 365, this artificially inflated daily EBITDA to over ₹900 Cr and valuation to ₹7,000+ Cr overnight.
+- **Choice**: 
+  1. Spreads revenue and EBITDA across a rolling 30-day moving window (`history30d`).
+  2. Applies an Exponential Moving Average (EMA: 90% previous, 10% target) to valuation updates.
+  3. Enforces a daily $\pm 6\%$ circuit clamp on enterprise valuation shifts.
+- **Rationale**: Reflects realistic financial market appraisal of project-based revenue streams where single lump-sum milestones do not imply permanent 365-day recurring earnings.
+
+## Decision 008: Square-Root Market Order Execution & Trading Fees
+- **Context**: Section 18A.4 specifies square-root order-flow impact ($0.65\times$ permanent, $0.35\times$ temporary).
+- **Choice**: Player orders execute at an effective price $P \times \exp(\pm 0.5 \times \text{impact})$ with permanent and temporary impact applied immediately to the stock state. A 0.1% transaction fee (brokerage + STT) is deducted on trades and configured in `balance.json`.
+- **Rationale**: Prevents infinite liquidity arbitrage, reflects real-world market friction, and aligns directly with quantitative equity market microstructure.

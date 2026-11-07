@@ -30,8 +30,8 @@ export function createInitialCompany(
     ownerId,
     listed: false,
     sharesOutstanding: 10000000,
-    price: valuation / 10000000,
-    priceHistory: [valuation / 10000000],
+    price: Math.max(1, Math.round(valuation / 10000000)),
+    priceHistory: [Math.max(1, Math.round(valuation / 10000000))],
     financials: {
       revenueDaily: 500000,
       costsDaily: 351000,
@@ -227,15 +227,32 @@ export function stepCompanyDaily(
     ? updateFinancialStatements(company.financialStatements, financialRecord)
     : createDefaultFinancialStatements(currentCash);
 
-  // Valuation Calculation
-  const valuation = computeCompanyValuation(
-    Math.max(100000, ebitda) * 365,
-    totalRevenue * 365,
+  // Valuation Calculation:
+  // Use normalized sustainable 30-day run-rate rather than multiplying a single day's
+  // lump-sum milestone payout by 365 (which caused the 7,000 Cr spike bug).
+  const history = updatedStatements.history30d;
+  const count = Math.max(1, history.length);
+  const avgDailyRevenue30d = history.reduce((acc, r) => acc + r.revenue, 0) / count;
+  const avgDailyEbitda30d = history.reduce((acc, r) => acc + r.ebitda, 0) / count;
+
+  const normalizedAnnualRevenue = avgDailyRevenue30d * 365;
+  const normalizedAnnualEbitda = avgDailyEbitda30d * 365;
+
+  const targetValuation = computeCompanyValuation(
+    normalizedAnnualEbitda,
+    normalizedAnnualRevenue,
     currentCash,
     company.financials.debt
   );
 
-  const newPrice = Math.max(1, Math.round(valuation / company.sharesOutstanding));
+  // Exponential smoothing (EMA) and daily circuit clamp (max +/- 6% valuation move per day)
+  const prevValuation = (company.price || 7) * company.sharesOutstanding;
+  const smoothedValuation = Math.round(prevValuation * 0.90 + targetValuation * 0.10);
+  const clampedValuation = Math.round(
+    Math.min(prevValuation * 1.06, Math.max(prevValuation * 0.94, smoothedValuation))
+  );
+
+  const newPrice = Math.max(1, Math.round(clampedValuation / company.sharesOutstanding));
   const priceHistory = [...company.priceHistory, newPrice];
   if (priceHistory.length > 400) priceHistory.shift();
 

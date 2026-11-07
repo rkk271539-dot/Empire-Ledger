@@ -44,3 +44,21 @@ export function meanAutocorr(arr: number[], maxLag = 10): number {
   }
   return sum / maxLag;
 }
+
+export function correlation(x: number[], y: number[]): number {
+  if (x.length !== y.length || x.length < 2) return 0;
+  const mx = mean(x);
+  const my = mean(y);
+  let cov = 0;
+  let sx = 0;
+  let sy = 0;
+  for (let i = 0; i < x.length; i++) {
+    const dx = x[i] - mx;
+    const dy = y[i] - my;
+    cov += dx * dy;
+    sx += dx * dx;
+    sy += dy * dy;
+  }
+  const denom = Math.sqrt(sx * sy);
+  return denom === 0 ? 0 : cov / denom;
+}

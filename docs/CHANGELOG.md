@@ -4,7 +4,35 @@ All notable changes to Empire Ledger are documented in this file.
 
 ---
 
-## [0.2.0] - Economy Core
+## [0.3.0] - Market & Equity Trading
+
+### Added
+- **24 Listed Companies across 8 Sectors (`/src/data/config/companies.json`)**:
+  - Technology, Pharma, Banking, Energy, Real Estate, FMCG, Manufacturing, Media (3 companies each).
+  - Pre-seeded 30-day realistic price histories and fundamentals (P/E ratio, dividend yield, market cap, beta, ADV).
+- **Section 18A Stock Price Simulation (`/src/engine/market/`)**:
+  - Heston-style stochastic volatility with vol-of-vol, leverage effect ($\rho$), and mean reversion.
+  - Markov regime switching (Calm, Normal, Stressed) with stressed correlation matrix expansion via Cholesky decomposition.
+  - Square-root order impact law ($0.65\times$ permanent, $0.35\times$ temporary impact) with daily $\pm 10\%$ circuit limit clamps.
+  - Daily Empire 24 Index calculation tracking market-cap weighted performance.
+- **Order Matching & Trading Desk**:
+  - `BUY_SHARES` and `SELL_SHARES` engine commands with cash conservation and 0.1% STT/brokerage fee.
+  - Interactive Trading Modal with real-time slippage impact calculation and quick share presets.
+  - Interactive SVG price chart with gradient fills, gridlines, min/max bounds, and responsive touch controls.
+  - Sparkline charts on all listed company cards.
+- **Portfolio Tracking**:
+  - Dedicated "My Portfolio" view tracking total invested, current valuation, unrealized P&L, today's gain, and individual holding breakdown.
+  - "Wife's Portfolio" peek showing Ananya Mehta's independent value-investing holdings.
+  - Daily dividend payouts credited directly to cash balance.
+- **Statistical Dynamics Tests (`tests/dynamics/stockModel.test.ts` & `tests/engine/market.test.ts`)**:
+  - Verifies kurtosis, volatility clustering, noise properties, and 100-day simulation stability.
+
+### Fixed
+- **EBITDA Enterprise Valuation Spike Bug (7,000+ Cr)**:
+  - Eliminated single-day lump-sum milestone multiplier bug where a single day's project completion was multiplied by 365.
+  - Switched to rolling 30-day trailing average run rate (`history30d`).
+  - Added 90%/10% Exponential Moving Average (EMA) smoothing and strict $\pm 6\%$ daily valuation circuit clamps.
+  - Added automated sanity assertions ensuring enterprise valuation remains realistic under continuous gameplay.
 
 ### Added
 - **Founder Setup & Onboarding Registry**:

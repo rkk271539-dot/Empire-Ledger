@@ -5,6 +5,15 @@ import { Rng } from './dynamics/rng';
 import { CURRENT_SCHEMA_VERSION } from './save/serialize';
 import balanceConfig from '../data/config/balance.json';
 import { createInitialCompany, stepCompanyDaily, createNewHire } from './company';
+import {
+  loadListedCompanies,
+  computeInitialIndexLevel,
+  stepMarketDaily,
+  executeBuyOrder,
+  executeSellOrder,
+  calculatePortfolioSummary,
+  stepWifeHoldings,
+} from './market';
 
 export * from './core/types';
 export * from './core/commands';
@@ -19,6 +28,7 @@ export * from './dynamics/trustModel';
 export * from './dynamics/lean';
 export * from './dynamics/stats';
 export * from './company';
+export * from './market';
 export * from './save/serialize';
 export * from './save/storage';
 
@@ -99,15 +109,31 @@ export function createInitialState(seed = 12345): GameState {
     history: [{ day: 1, netWorth: 60000000 }],
   };
 
+  const listedCompanies = loadListedCompanies(seed);
+  const initialIndex = computeInitialIndexLevel(listedCompanies);
+
+  const advShares: Record<string, number> = {};
+  for (const c of Object.values(listedCompanies)) {
+    if (c.stockParams) {
+      advShares[c.id] = c.stockParams.adv;
+    }
+  }
+
   const market: MarketState = {
-    indexLevel: 24500,
+    indexLevel: initialIndex,
     dailyReturn: 0.001,
-    advShares: {},
+    advShares,
+    regime: 0,
+    stress: 0.15,
+    sectorReturns: {},
+    indexHistory: [initialIndex],
   };
+
+  const initialWife = stepWifeHoldings(wife, listedCompanies, 1, Rng.stream(seed, 'wife_init', 0));
 
   const people: Record<string, Person> = {
     rival,
-    wife,
+    wife: initialWife,
   };
 
   // Default relationship between player and wife
@@ -165,6 +191,7 @@ export function createInitialState(seed = 12345): GameState {
     people,
     companies: {
       company_player: playerCompany,
+      ...listedCompanies,
     },
     market,
     relationships,
@@ -213,17 +240,21 @@ export function createInitialState(seed = 12345): GameState {
 
 export function tick(state: GameState, seed: number): { state: GameState; events: GameEvent[] } {
   const nextDay = state.day + 1;
-  const rng = Rng.stream(seed, 'day_tick', nextDay);
   const events: GameEvent[] = [];
 
-  // Macro update
-  const moodNoise = rng.normal() * 0.02;
-  const nextMood = Math.max(-1, Math.min(1, state.macro.marketMood * 0.95 + moodNoise));
-  const marketReturn = nextMood * 0.005 + rng.studentT(5) * 0.008;
-  const nextIndexLevel = Math.round(state.market.indexLevel * (1 + marketReturn));
+  // 1. Step listed stock market
+  const rngMarket = Rng.stream(seed, 'market_step', nextDay);
+  const marketResult = stepMarketDaily(state.companies, state.market, nextDay, rngMarket);
+  const companies = { ...marketResult.companies };
+  const nextMarket = marketResult.market;
+  events.push(...marketResult.events);
 
-  // Step player company
-  const companies = { ...state.companies };
+  // 2. Macro update
+  const rngMacro = Rng.stream(seed, 'macro_tick', nextDay);
+  const moodNoise = rngMacro.normal() * 0.02;
+  const nextMood = Math.max(-1, Math.min(1, state.macro.marketMood * 0.95 + moodNoise));
+
+  // 3. Step player company
   let playerCash = state.player.cash;
   let playerCharm = state.player.charm;
   let playerReputation = state.player.reputation;
@@ -255,7 +286,22 @@ export function tick(state: GameState, seed: number): { state: GameState; events
     companyValuation = compStep.company.price * compStep.company.sharesOutstanding;
   }
 
-  // Step Rival & Wife net worth with slight growth & volatility
+  // 4. Portfolio Dividends from listed companies
+  for (const h of state.player.holdings) {
+    const comp = companies[h.companyId];
+    if (comp && comp.financials.dividendYield && comp.financials.dividendYield > 0) {
+      const dailyDivPerShare = (comp.price * comp.financials.dividendYield) / 365;
+      const dailyDiv = Math.round(dailyDivPerShare * h.shares);
+      if (dailyDiv >= 1) {
+        playerCash += dailyDiv;
+      }
+    }
+  }
+
+  // 5. Calculate player portfolio value
+  const playerPortfolio = calculatePortfolioSummary(state.player.holdings, companies);
+
+  // 6. Step Rival & Wife
   const rngRival = Rng.stream(seed, 'rival_growth', nextDay);
   const rivalGrowth = 0.0003 + nextMood * 0.0008 + rngRival.studentT(5) * 0.003;
   const curRival = state.people['rival'];
@@ -263,12 +309,11 @@ export function tick(state: GameState, seed: number): { state: GameState; events
     ? Math.round(curRival.netWorth * (1 + rivalGrowth))
     : 120000000;
 
-  const rngWife = Rng.stream(seed, 'wife_growth', nextDay);
-  const wifeGrowth = 0.0002 + nextMood * 0.0005 + rngWife.studentT(5) * 0.002;
+  const rngWife = Rng.stream(seed, 'wife_step', nextDay);
   const curWife = state.people['wife'];
-  const nextWifeNetWorth = curWife
-    ? Math.round(curWife.netWorth * (1 + wifeGrowth))
-    : 60000000;
+  const updatedWife = curWife
+    ? stepWifeHoldings(curWife, companies, nextDay, rngWife)
+    : undefined;
 
   const updatedPeople: Record<string, Person> = {
     ...state.people,
@@ -280,23 +325,20 @@ export function tick(state: GameState, seed: number): { state: GameState; events
       history: [...curRival.history, { day: nextDay, netWorth: nextRivalNetWorth }].slice(-100),
     };
   }
-  if (curWife) {
-    updatedPeople['wife'] = {
-      ...curWife,
-      netWorth: nextWifeNetWorth,
-      history: [...curWife.history, { day: nextDay, netWorth: nextWifeNetWorth }].slice(-100),
-    };
+  if (updatedWife) {
+    updatedPeople['wife'] = updatedWife;
   }
 
-  // Player Total Net Worth = Liquid Cash + Equity in Owned Companies - Debt
-  const playerNetWorth = playerCash + companyValuation - state.player.debt;
+  // 7. Player Total Net Worth = Liquid Cash + Equity in Owned Company + Stock Portfolio - Debt
+  const playerNetWorth = playerCash + playerPortfolio.totalCurrentValue + companyValuation - state.player.debt;
 
-  // Update history
+  // 8. Update history
+  const nextIndexLevel = nextMarket.indexLevel;
   const history = {
     days: [...state.history.days, nextDay],
     playerNetWorth: [...state.history.playerNetWorth, playerNetWorth],
     rivalNetWorth: [...state.history.rivalNetWorth, nextRivalNetWorth],
-    wifeNetWorth: [...state.history.wifeNetWorth, nextWifeNetWorth],
+    wifeNetWorth: [...state.history.wifeNetWorth, updatedWife?.netWorth ?? 60000000],
     marketIndex: [...state.history.marketIndex, nextIndexLevel],
   };
 
@@ -310,12 +352,13 @@ export function tick(state: GameState, seed: number): { state: GameState; events
   }
 
   // Generate day advancement event
+  const marketReturn = nextMarket.dailyReturn;
   events.push({
     id: `ev_day_${nextDay}`,
     day: nextDay,
     type: 'DAY_ADVANCED',
     title: `Day ${nextDay} Began`,
-    message: `Market opened at ${nextIndexLevel} (${(marketReturn * 100).toFixed(2)}%)`,
+    message: `Market closed at ${nextIndexLevel} (${(marketReturn * 100).toFixed(2)}%)`,
     importance: 1,
   });
 
@@ -348,11 +391,7 @@ export function tick(state: GameState, seed: number): { state: GameState; events
     },
     companies,
     people: updatedPeople,
-    market: {
-      ...state.market,
-      indexLevel: nextIndexLevel,
-      dailyReturn: marketReturn,
-    },
+    market: nextMarket,
     history,
   };
 
@@ -383,6 +422,120 @@ export function reduce(state: GameState, command: Command): { state: GameState; 
         allEvents.push(...step.events);
       }
       return { state: cur, events: allEvents };
+    }
+
+    case 'BUY_SHARES': {
+      const company = state.companies[command.companyId];
+      if (!company) {
+        return {
+          state,
+          events: [
+            {
+              id: `err_buy_${state.day}`,
+              day: state.day,
+              type: 'TRADE_ERROR',
+              title: 'Order Rejected',
+              message: 'Company not found.',
+              importance: 2,
+            },
+          ],
+        };
+      }
+
+      const res = executeBuyOrder(state.player, company, command.shares, state.day);
+      if (!res.success) {
+        return {
+          state,
+          events: [
+            {
+              id: `err_buy_${command.companyId}_${state.day}`,
+              day: state.day,
+              type: 'TRADE_ERROR',
+              title: 'Buy Order Rejected',
+              message: res.error,
+              importance: 2,
+            },
+          ],
+        };
+      }
+
+      const updatedCompanies = {
+        ...state.companies,
+        [company.id]: res.result.company,
+      };
+
+      const playerPortfolio = calculatePortfolioSummary(res.result.player.holdings, updatedCompanies);
+      const companyValuation = (updatedCompanies['company_player']?.price || 0) * (updatedCompanies['company_player']?.sharesOutstanding || 0);
+      const netWorth = res.result.player.cash + playerPortfolio.totalCurrentValue + companyValuation - res.result.player.debt;
+
+      return {
+        state: {
+          ...state,
+          player: {
+            ...res.result.player,
+            netWorth,
+          },
+          companies: updatedCompanies,
+        },
+        events: [res.result.event],
+      };
+    }
+
+    case 'SELL_SHARES': {
+      const company = state.companies[command.companyId];
+      if (!company) {
+        return {
+          state,
+          events: [
+            {
+              id: `err_sell_${state.day}`,
+              day: state.day,
+              type: 'TRADE_ERROR',
+              title: 'Order Rejected',
+              message: 'Company not found.',
+              importance: 2,
+            },
+          ],
+        };
+      }
+
+      const res = executeSellOrder(state.player, company, command.shares, state.day);
+      if (!res.success) {
+        return {
+          state,
+          events: [
+            {
+              id: `err_sell_${command.companyId}_${state.day}`,
+              day: state.day,
+              type: 'TRADE_ERROR',
+              title: 'Sell Order Rejected',
+              message: res.error,
+              importance: 2,
+            },
+          ],
+        };
+      }
+
+      const updatedCompanies = {
+        ...state.companies,
+        [company.id]: res.result.company,
+      };
+
+      const playerPortfolio = calculatePortfolioSummary(res.result.player.holdings, updatedCompanies);
+      const companyValuation = (updatedCompanies['company_player']?.price || 0) * (updatedCompanies['company_player']?.sharesOutstanding || 0);
+      const netWorth = res.result.player.cash + playerPortfolio.totalCurrentValue + companyValuation - res.result.player.debt;
+
+      return {
+        state: {
+          ...state,
+          player: {
+            ...res.result.player,
+            netWorth,
+          },
+          companies: updatedCompanies,
+        },
+        events: [res.result.event],
+      };
     }
 
     case 'SET_SLOT': {

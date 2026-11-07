@@ -6,6 +6,9 @@
 ## Overview
 **Empire Ledger** is a deep economic and life-simulation tycoon game where you start as a founder in an India-grounded market, balancing company operations, stock-market trading, investor relations (charm & 60-day announcements), marriage, rival competition, institutional flows (FII/DII), and high-stakes business takeovers.
 
+## Live Demo
+Deployed over GitHub Pages: **https://rkk271539-dot.github.io/Empire-Ledger/**
+
 ## Architecture
 - **Headless Engine**: `/src/engine` has zero React/DOM dependencies and runs deterministically via seeded PRNG streams. Can execute in a Web Worker or headless CLI.
 - **Dynamic Simulation Math (Section 18A)**: No fixed ranges or raw `Math.random()`. Uses Heston-style volatility, Ornstein-Uhlenbeck processes, Cholesky correlated shocks, regime switching, Beta-trust dynamics, and fat-tailed distributions (Student-t, Laplace, Pareto).
@@ -33,9 +36,9 @@ npm run build
 
 ## Versioning & Roadmap
 - [x] **v0.1 Foundation** — Project scaffold, seeded RNG & dynamics toolkit (18A.1-18A.2), game clock, save/load, mobile-first tab shell.
-- [ ] **v0.2 Economy Core** — Player company, departments, employees, revenue, cash, net worth.
+- [x] **v0.2 Economy Core** — Player company, departments, employees, revenue, cash, net worth, founder setup onboarding.
 - [ ] **v0.25 Business Operations** — Demand-capacity model, decisions queue, Monte Carlo advisor.
-- [ ] **v0.3 Market** — 24 listed companies, 8 sectors, order-flow impact, portfolios.
+- [x] **v0.3 Market** — 24 listed companies, 8 sectors, Section 18A stochastic pricing, square-root order-flow impact, interactive trading desk with SVG price charts, player & wife portfolios, and EBITDA valuation spike bugfix.
 - [ ] **v0.4 People** — 30+ AI businessmen/women, Rich List, person cards, rival.
 - [ ] **v0.45 Institutions & Startups** — FII/DII flows, banks, venture rounds & IPOs.
 - [ ] **v0.5 Investors & Charm** — Charm system, 60-day announcement cycle, lean & flows.

@@ -45,17 +45,17 @@ export function stepStock(s: StockState, p: StockParams, env: StockEnv, rng: Rng
 
   // 2) Common factors (creates correlation across stocks) + own diffusion
   const common = p.betaMkt * env.marketShock + p.betaSector * (env.sectorShock[p.sector] ?? 0);
-  const idio = sigma * zP;
+  const idio = sigma * rng.studentT(5);
 
   // 3) Mean reversion toward fundamentals (slower in stressed regimes, markets overshoot)
   const gap = Math.log(env.fundamentalValue) - s.logP;
   const pull = p.kappaP * (regime === 2 ? 0.4 : 1) * clamp(gap, -0.7, 0.7);
 
   // 4) Jumps: intensity grows with news; sizes are fat-tailed and tone-biased
-  const lambda = p.jumpBase + 0.12 * env.newsIntensity + 0.05 * env.marketStress;
+  const lambda = p.jumpBase + 0.15 * env.newsIntensity + 0.08 * env.marketStress;
   let jump = 0;
   const n = rng.poisson(lambda);
-  for (let i = 0; i < n; i++) jump += rng.laplace(0.02) + 0.015 * env.newsTone;
+  for (let i = 0; i < n; i++) jump += rng.laplace(0.045) + 0.025 * env.newsTone;
 
   // 5) Order-flow impact (square-root law): permanent + temporary part that reverts later
   const q = env.netFlowShares;

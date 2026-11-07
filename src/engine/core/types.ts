@@ -1,3 +1,5 @@
+import { StockParams, StockState } from '../dynamics/stockModel';
+
 export type Money = number;
 export type PersonId = string;
 export type CompanyId = string;
@@ -173,6 +175,8 @@ export interface FinancialStatements {
 export interface Company {
   id: CompanyId;
   name: string;
+  symbol?: string;
+  description?: string;
   sector: SectorId;
   ownerId?: PersonId;
   listed: boolean;
@@ -185,7 +189,9 @@ export interface Company {
     profitDaily: Money;
     cash: Money;
     debt: Money;
-    employees: number;
+    employees?: number;
+    peRatio?: number;
+    dividendYield?: number;
   };
   departments?: Record<DepartmentId, Department>;
   employeesList?: Employee[];
@@ -199,7 +205,9 @@ export interface Company {
     moat: number;
     risk: number;
   };
-  dividendPolicy: number; // 0 - 1
+  dividendPolicy?: number; // 0 - 1
+  stockParams?: StockParams;
+  stockState?: StockState;
 }
 
 export interface Holding {
@@ -213,6 +221,11 @@ export interface MarketState {
   indexLevel: number;
   dailyReturn: number;
   advShares: Record<CompanyId, number>;
+  regime?: 0 | 1 | 2;
+  stress?: number;
+  sectorReturns?: Record<string, number>;
+  indexHistory?: number[];
+  lastTradeDay?: number;
 }
 
 export interface AnnouncementRecord {
