@@ -1,0 +1,19 @@
+{
+  "startingPlayerCash": 50000000,
+  "startingPlayerNetWorth": 100000000,
+  "startingRivalCash": 50000000,
+  "startingWifeCash": 25000000,
+  "defaultStartDate": "2026-01-01",
+  "announcementCycleDays": 60,
+  "slotsPerDay": 4,
+  "aiCashBufferRatio": 0.15,
+  "aiMaxInvestRatio": 0.20,
+  "priceImpactFactor": 0.8,
+  "dailyCircuitLimit": 0.10,
+  "baseRiskFreeRate": 0.065,
+  "defaultStockDailyVol": 0.018,
+  "loanInterestRate": 0.12,
+  "loanDurationDays": 100,
+  "fdInterestRate": 0.06,
+  "fdDurationDays": 100
+}

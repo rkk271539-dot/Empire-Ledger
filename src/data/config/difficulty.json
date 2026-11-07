@@ -1,0 +1,38 @@
+{
+  "easy": {
+    "name": "Easy",
+    "rivalLookahead": 5,
+    "rivalAdaptationRate": 0.02,
+    "rivalAggression": 0.3,
+    "mistakeRate": 0.25,
+    "investorPatience": 1.4,
+    "marketVolatility": 0.8
+  },
+  "normal": {
+    "name": "Normal",
+    "rivalLookahead": 10,
+    "rivalAdaptationRate": 0.05,
+    "rivalAggression": 0.6,
+    "mistakeRate": 0.10,
+    "investorPatience": 1.0,
+    "marketVolatility": 1.0
+  },
+  "hard": {
+    "name": "Hard",
+    "rivalLookahead": 16,
+    "rivalAdaptationRate": 0.10,
+    "rivalAggression": 0.85,
+    "mistakeRate": 0.04,
+    "investorPatience": 0.75,
+    "marketVolatility": 1.3
+  },
+  "brutal": {
+    "name": "Brutal",
+    "rivalLookahead": 24,
+    "rivalAdaptationRate": 0.20,
+    "rivalAggression": 1.0,
+    "mistakeRate": 0.01,
+    "investorPatience": 0.55,
+    "marketVolatility": 1.5
+  }
+}

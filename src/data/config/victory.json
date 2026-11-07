@@ -1,0 +1,7 @@
+{
+  "winRivalMultiplier": 8.0,
+  "winRichListLeadMultiplier": 2.0,
+  "winRichListDaysRequired": 180,
+  "loseRivalMultiplier": 8.0,
+  "loseBankruptcyGraceDays": 30
+}
